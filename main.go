@@ -51,6 +51,7 @@ func main(){
         }
         return nil
     }
+
     variablesEntries.OnChanged = func (str string) {
         if variablesEntries.Text == "" {
             errorLabel2.Show()
@@ -60,8 +61,26 @@ func main(){
         }
     }
 
-    inputVBox := container.NewVBox(logLabel, logEntries, errorLabel, variablesLabel, variablesEntries, errorLabel2)
+    data := struct {
+        log, variables string
+    } {
+        log : "",
+        variables : "",
+    }
 
+    information := widget.NewLabel("")
+    information.Hide()
+
+    button := widget.NewButton("Submit", func () {
+       if variablesEntries.Text != "" && logEntries.Text != "" {
+           data.log = logEntries.Text 
+           data.variables = variablesEntries.Text
+           information.SetText("This is the information that we are processing: \n" + data.log + "\n" + data.variables) 
+           information.Show()
+       }
+    })
+
+    inputVBox := container.NewVBox(logLabel, logEntries, errorLabel, variablesLabel, variablesEntries, errorLabel2, layout.NewSpacer(), button, layout.NewSpacer(), information, layout.NewSpacer())
     content := container.NewHBox(layout.NewSpacer(), inputVBox, layout.NewSpacer())
 
     w.SetContent(content)
@@ -73,3 +92,7 @@ func main(){
     a.Run()
 }
 
+func processData(data struct {
+    log, variables string
+}) {
+}
