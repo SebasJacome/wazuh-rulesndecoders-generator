@@ -1,6 +1,6 @@
 [Details]
-Icon = "assets/Icon.png"
-Name = "Wazuh RD"
-ID = "app.wazuhrd"
-Version = "0.1.0"
-Build = 8
+  Icon = "assets/Icon.png"
+  Name = "Wazuh RD"
+  ID = "app.wazuhrd"
+  Version = "0.1.0"
+  Build = 10

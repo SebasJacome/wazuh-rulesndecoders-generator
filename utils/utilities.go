@@ -8,11 +8,16 @@ func SplitString(input string) []string {
 	return strings.Split(input, ",")
 }
 
-func CompareLogAndVars(log string, vars []string) bool {
+func CompareLogAndVars(log string, vars []string) string {
+	var result string
 	for _, value := range vars {
 		if !strings.Contains(log, value) {
-			return false
+			result += value + ","
 		}
 	}
-	return true
+	
+	if result != ""{
+		result = result[:len(result)-1]
+	}
+	return result 
 }
