@@ -46,9 +46,9 @@ func CreateRuleWindow(pDecoderName string, pVariables []string) {
 				return
 			}
 
-			// Check if the rule level is greater than 10
-			if ruleLevel > 10 {
-				dialog.ShowError(errors.New("Rule level cannot be greater than 10."), w3)
+			// Check if the rule level is greater than 16
+			if ruleLevel > 16 {
+				dialog.ShowError(errors.New("Rule level cannot be greater than 16."), w3)
 				return
 			}
 
