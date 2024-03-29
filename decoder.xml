@@ -1,0 +1,5 @@
+<decoder name="felix">
+	<prematch>^felix</prematch>
+	<regex type="pcre2">felix[=:]("\.+")</regex>
+	<order>felix</order>
+</decoder>

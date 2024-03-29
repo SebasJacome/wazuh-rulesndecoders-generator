@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -84,9 +85,6 @@ func createContent() fyne.CanvasObject {
 		variables: "",
 	}
 
-	information := widget.NewLabel("")
-	information.Hide()
-
 	button := widget.NewButton("Submit", func() {
 		if variablesEntries.Text != "" && logEntries.Text != "" {
 			data.log = logEntries.Text
@@ -105,12 +103,14 @@ func processData(data struct {
 }) {
 	fmt.Println("Processing the variables...")
 	processedVars := utils.SplitString(data.variables)
-	if utils.CompareLogAndVars(data.log, processedVars) {
+	result := utils.CompareLogAndVars(data.log, processedVars)
+	if result == "" {
 		fmt.Println("All the variables were found inside the log...")
 		fmt.Println("End of validation")
-		CreateDecoderWindow()
+		CreateDecoderWindow(data.log, processedVars)
 	} else {
 		fmt.Println("There is one or more variables that were not found in the log")
 		fmt.Println("The variables must be contained by the log")
+		dialog.ShowInformation("Invalid input", "Variables "+result+" were not found in the log", w)
 	}
 }

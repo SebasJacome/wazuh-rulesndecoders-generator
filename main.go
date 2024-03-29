@@ -6,9 +6,9 @@ import (
 )
 
 var a fyne.App = app.New()
+var w fyne.Window = a.NewWindow("Wazuh R&D")
 
 func main() {
-	w := a.NewWindow("Wazuh R&D")
 
 	w.SetContent(MakeGui())
 	w.Resize(fyne.NewSize(800, 600))
