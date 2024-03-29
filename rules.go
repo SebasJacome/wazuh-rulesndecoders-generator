@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"os"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -37,7 +38,20 @@ func CreateRuleWindow(pDecoderName string, pVariables []string) {
 	ruleDescriptionBox := container.NewVBox(ruleDescriptionLabel, ruleDescriptionEntry)
 
 	submitButton := widget.NewButton("Submit", func() {
-		if ruleIDEntry.Text != "" && ruleLevelEntry.Text != "" && ruleDescriptionEntry.Text != "" {
+		if ruleIDEntry.Text != "" && ruleDescriptionEntry.Text != "" {
+			// Convert the rule level text to an integer
+			ruleLevel, err := strconv.Atoi(ruleLevelEntry.Text)
+			if err != nil {
+				dialog.ShowError(errors.New("Invalid rule level. Please enter a number."), w3)
+				return
+			}
+
+			// Check if the rule level is greater than 10
+			if ruleLevel > 10 {
+				dialog.ShowError(errors.New("Rule level cannot be greater than 10."), w3)
+				return
+			}
+
 			data := ruleInfo{
 				id:          ruleIDEntry.Text,
 				level:       ruleLevelEntry.Text,
