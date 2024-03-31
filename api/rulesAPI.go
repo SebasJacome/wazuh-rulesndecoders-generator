@@ -9,7 +9,11 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"regexp"
+	"strings"
 
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/dialog"
 	"github.com/pelletier/go-toml/v2"
 )
 
@@ -45,37 +49,10 @@ type JSONRuleFileResponse struct {
 	ErrorNum int    `json:"error"`
 }
 
-type ruleInfo struct {
-	ID          string `json:"@id"`
-	Level       string `json:"@level"`
-	ProgramName string `json:"program_name"`
-	Description string `json:"description"`
-	Group       string `json:"group"`
-}
-
-type group struct {
-	Name string   `json:"@name"`
-	Rule ruleInfo `json:"rule"`
-}
-
-type AffectedItem struct {
-	Group group `json:"group"`
-}
-
-type JSONRuleInfoResponse struct {
-	Data struct {
-		AffectedItems      []AffectedItem `json:"affected_items"`
-		TotalAffectedItems int            `json:"total_affected_items"`
-		TotalFailedItems   []string       `json:"failed_items"`
-	} `json:"data"`
-	Message  string `json:"message"`
-	ErrorNum int    `json:"error"`
-}
-
-func RequestRuleIDs() {
+func RequestRuleIDs(w3 fyne.Window) map[string]bool {
 	readConfFile()
 	var response JSONRuleFileResponse
-	var ruleInfoResponse JSONRuleInfoResponse
+	ruleIDs := make(map[string]bool)
 	stringResponse := createRequest("GET", "/rules/files")
 
 	if err := json.Unmarshal([]byte(stringResponse), &response); err != nil {
@@ -85,20 +62,28 @@ func RequestRuleIDs() {
 	for _, itemI := range response.Data.AffectedItems {
 		if itemI.RelativeDir == "etc/rules" {
 			ruleInfo := createRequest("GET", "/rules/files/"+itemI.FileName)
-			fmt.Println(ruleInfo)
-			if err := json.Unmarshal([]byte(ruleInfo), &ruleInfoResponse); err != nil {
-				panic(err)
+
+			r := regexp.MustCompile(`"@id": "[1-9][0-9]*"`)
+			matches := r.FindAllString(ruleInfo, -1)
+			if matches == nil {
+				dialog.ShowInformation("Corrupted Rule File", "The file "+itemI.FileName+" is corrupted or it has no rules. Do something about it", w3)
 			}
-			for _, itemJ := range ruleInfoResponse.Data.AffectedItems {
-				fmt.Println(itemJ.Group.Rule.ID)
+
+			for _, itemJ := range matches {
+				parts := strings.Split(itemJ, " ")
+				if len(parts) == 2 {
+					parts[1] = strings.Trim(parts[1], `"`)
+					ruleIDs[parts[1]] = true
+				}
 			}
 		}
 	}
 
+	return ruleIDs
 }
 
 func readConfFile() {
-	data, err := os.ReadFile("./conf.toml")
+	data, err := os.ReadFile("./api/conf.toml")
 	if err != nil {
 		panic(err)
 	}
@@ -116,19 +101,16 @@ func createRequest(requestType, endpoint string) string {
 
 	token, err := getAuthToken(loginURL, config.Username, config.Password)
 	if err != nil {
-		fmt.Println(err.Error())
-		return ""
+		panic(err)
 	}
 
-	// Add the Bearer token to the headers
 	headers := make(map[string]string)
 	headers["Authorization"] = "Bearer " + token
 	headers["Content-Type"] = "application/json"
 
 	response, err := getResponse(requestType, baseURL+endpoint, headers, nil)
 	if err != nil {
-		fmt.Println(err.Error())
-		return ""
+		panic(err)
 	}
 
 	return string(response)

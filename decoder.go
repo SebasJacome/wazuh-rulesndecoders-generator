@@ -79,8 +79,12 @@ func decoderXMLGenerator(data decoderInfo) {
 			"</decoder>"
 		xmlFile.WriteString(xml)
 		dialog.ShowCustomConfirm("Success!", "Generate Rule", "Cancel", widget.NewLabel("Do you want to generate the rule for this decoder?"), func(b bool) {
-			w2.Close()
-			CreateRuleWindow(data.decoderName, data.variables)
+			if b {
+				w2.Close()
+				CreateRuleWindow(data.decoderName, data.variables)
+			} else {
+				w2.Close()
+			}
 		}, w2)
 	}
 }

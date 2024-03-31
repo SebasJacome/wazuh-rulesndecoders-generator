@@ -10,6 +10,9 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
+
+	"go_gui/api"
+	"go_gui/utils"
 )
 
 var w3 fyne.Window
@@ -21,7 +24,6 @@ type ruleInfo struct {
 
 func CreateRuleWindow(pDecoderName string, pVariables []string) {
 	w3 = a.NewWindow("Wizard Menu Rule")
-
 	ruleIDLabel := widget.NewLabel("Write the ID of your new rule")
 	ruleIDEntry := widget.NewEntry()
 	ruleIDEntry.SetPlaceHolder("Ej. 202232")
@@ -38,17 +40,22 @@ func CreateRuleWindow(pDecoderName string, pVariables []string) {
 	ruleDescriptionBox := container.NewVBox(ruleDescriptionLabel, ruleDescriptionEntry)
 
 	submitButton := widget.NewButton("Submit", func() {
-		if ruleIDEntry.Text != "" && ruleDescriptionEntry.Text != "" {
-			// Convert the rule level text to an integer
+		if ruleIDEntry.Text != "" && ruleDescriptionEntry.Text != "" && ruleLevelEntry.Text != "" {
 			ruleLevel, err := strconv.Atoi(ruleLevelEntry.Text)
 			if err != nil {
 				dialog.ShowError(errors.New("Invalid rule level. Please enter a number."), w3)
 				return
 			}
 
-			// Check if the rule level is greater than 16
 			if ruleLevel > 16 {
 				dialog.ShowError(errors.New("Rule level cannot be greater than 16."), w3)
+				return
+			}
+
+			var ruleIDs map[string]bool = api.RequestRuleIDs(w3)
+
+			if utils.CompareExistingIDs(ruleIDs, ruleIDEntry.Text) {
+				dialog.ShowError(errors.New("That rule already exists, pick another ID"), w3)
 				return
 			}
 
@@ -85,8 +92,3 @@ func ruleXMLGenerator(data ruleInfo) {
 		dialog.ShowInformation("Success!", "Rule xml file created succesfully", w3)
 	}
 }
-
-// <rule id="222000" level="3">
-//   <decoded_as>fortigate-custom</decoded_as>
-//   <description>Fortigate message: $(syscheck).</description>
-// </rule>

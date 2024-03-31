@@ -16,16 +16,21 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+var logEntries = widget.NewEntry()
+var variablesEntries = widget.NewEntry()
+
 func MakeGui() fyne.CanvasObject {
 	return container.NewBorder(makeToolBar(), nil, nil, nil, createContent())
 }
 
 func makeToolBar() fyne.CanvasObject {
 	toolbar := widget.NewToolbar(
-		widget.NewToolbarAction(theme.ContentAddIcon(), func() {
-
-		}),
+		widget.NewToolbarAction(theme.ContentAddIcon(), func() {}),
 		widget.NewToolbarAction(theme.SearchIcon(), func() {}),
+		widget.NewToolbarAction(theme.DeleteIcon(), func() {
+			logEntries.SetText("")
+			variablesEntries.SetText("")
+		}),
 	)
 	logo := canvas.NewImageFromResource(resourceLogosUPPng)
 	logo.FillMode = canvas.ImageFillContain
@@ -40,7 +45,6 @@ func createContent() fyne.CanvasObject {
 	errorLabel2.Hide()
 
 	logLabel := widget.NewLabel("Enter the log from where you want to extract the information")
-	logEntries := widget.NewEntry()
 	logEntries.SetPlaceHolder("Info - New agent connected: { \"name\": \"ExampleAgent\", \"ip\": \"192.168.1.100\", \"id\": \"001\"...")
 	logEntries.Validator = func(input string) error {
 		if len(logEntries.Text) == 0 {
@@ -59,7 +63,6 @@ func createContent() fyne.CanvasObject {
 	}
 
 	variablesLabel := widget.NewLabel("Type the variables that you want to read (multiple variables have to be separated by commas)")
-	variablesEntries := widget.NewEntry()
 	variablesEntries.SetPlaceHolder("name,ip,id...")
 	variablesEntries.Validator = func(input string) error {
 		if len(variablesEntries.Text) == 0 {

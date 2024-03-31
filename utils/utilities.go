@@ -15,9 +15,16 @@ func CompareLogAndVars(log string, vars []string) string {
 			result += value + ","
 		}
 	}
-	
-	if result != ""{
+
+	if result != "" {
 		result = result[:len(result)-1]
 	}
-	return result 
+	return result
+}
+
+func CompareExistingIDs(ruleIDs map[string]bool, ID string) bool {
+	if ruleIDs[ID] {
+		return true
+	}
+	return false
 }
