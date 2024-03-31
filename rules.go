@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"strconv"
 
@@ -24,6 +25,7 @@ type ruleInfo struct {
 
 func CreateRuleWindow(pDecoderName string, pVariables []string) {
 	w3 = a.NewWindow("Wizard Menu Rule")
+	fmt.Println("I've created the window")
 	ruleIDLabel := widget.NewLabel("Write the ID of your new rule")
 	ruleIDEntry := widget.NewEntry()
 	ruleIDEntry.SetPlaceHolder("Ej. 202232")
@@ -53,6 +55,10 @@ func CreateRuleWindow(pDecoderName string, pVariables []string) {
 			}
 
 			var ruleIDs map[string]bool = api.RequestRuleIDs(w3)
+			ruleID, err := strconv.Atoi(ruleIDEntry.Text)
+			if ruleID < 100000 || ruleID > 120000 {
+				dialog.ShowError(errors.New("The rule must be between the range 100000-120000"), w3)
+			}
 
 			if utils.CompareExistingIDs(ruleIDs, ruleIDEntry.Text) {
 				dialog.ShowError(errors.New("That rule already exists, pick another ID"), w3)
@@ -70,12 +76,15 @@ func CreateRuleWindow(pDecoderName string, pVariables []string) {
 		}
 	})
 
+	fmt.Println("I've created the content")
+
 	form := container.NewVBox(ruleIDBox, ruleLevelBox, ruleDescriptionBox, submitButton)
 	content := container.NewHBox(layout.NewSpacer(), form, layout.NewSpacer())
 	w3.SetContent(content)
 	w3.Resize(fyne.NewSize(800, 600))
 	w3.SetFixedSize(true)
 	w3.Show()
+	fmt.Println("I've shown the window")
 }
 
 func ruleXMLGenerator(data ruleInfo) {
@@ -90,5 +99,6 @@ func ruleXMLGenerator(data ruleInfo) {
 			"</group>"
 		xmlFile.WriteString(xml)
 		dialog.ShowInformation("Success!", "Rule xml file created succesfully", w3)
+		w3.Close()
 	}
 }
