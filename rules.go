@@ -98,8 +98,7 @@ func ruleXMLGenerator(data ruleInfo) {
 			"</rule>\n" +
 			"</group>"
 		xmlFile.WriteString(xml)
-		dialog.ShowInformation("Success!", "Rule xml file created succesfully", w3)
-		dialog.ShowConfirm("Upload file to Wazuh", "Do you want to upload both files to your wazuh?", func(bool) {
+		dialog.ShowConfirm("Successful creation!", "Do you want to upload both files to your Wazuh Server?", func(bool) {
 			// Implementación de función para subir archivos a wazuh usando su API
 			w3.Close()
 		}, w3)
