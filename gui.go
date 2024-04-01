@@ -4,8 +4,10 @@ package main
 import (
 	"errors"
 	"fmt"
+	"go_gui/api"
 	"go_gui/utils"
 	"image/color"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -26,7 +28,19 @@ func MakeGui() fyne.CanvasObject {
 func makeToolBar() fyne.CanvasObject {
 	toolbar := widget.NewToolbar(
 		widget.NewToolbarAction(theme.ContentAddIcon(), func() {}),
-		widget.NewToolbarAction(theme.SearchIcon(), func() {}),
+		widget.NewToolbarAction(theme.SearchIcon(), func() {
+			id := widget.NewEntry()
+			idName := widget.NewFormItem("ID", id)
+			dialog.ShowForm("Title", "Yes", "Cancel", []*widget.FormItem{idName}, func(b bool) {
+				if b {
+					idInt, err := strconv.Atoi(id.Text)
+					if err != nil {
+						panic(err)
+					}
+					api.SearchRequestedID(idInt)
+				}
+			}, w)
+		}),
 		widget.NewToolbarAction(theme.DeleteIcon(), func() {
 			logEntries.SetText("")
 			variablesEntries.SetText("")
