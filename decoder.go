@@ -3,6 +3,8 @@ package main
 import (
 	"go_gui/api"
 
+	"strings"
+
 	"errors"
 	"os"
 
@@ -16,6 +18,34 @@ import (
 type decoderInfo struct {
 	log, decoderName, prematch string
 	variables                  []string
+}
+
+func isValidDecoderName(decoderName string) bool {
+	// Check if the decoder name starts or ends with a special character
+	if !isAlphaNumeric(rune(decoderName[0])) || !isAlphaNumeric(rune(decoderName[len(decoderName)-1])) {
+		return false
+	}
+
+	// Check if the decoder name contains more than two words separated by hyphens
+	parts := strings.Split(decoderName, "-")
+	if len(parts) > 3 {
+		return false
+	}
+
+	// Check if the middle parts (if any) contain only alphanumeric characters
+	for _, part := range parts[1:] {
+		for _, r := range part {
+			if !isAlphaNumeric(r) {
+				return false
+			}
+		}
+	}
+
+	return true
+}
+
+func isAlphaNumeric(r rune) bool {
+	return (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9')
 }
 
 var w2 fyne.Window
@@ -35,13 +65,19 @@ func CreateDecoderWindow(pLog string, pVariables []string, w1 fyne.Window) {
 
 	submitButton := widget.NewButton("Submit", func() {
 		if decoderNameEntry.Text != "" && decoderPrematchEntry.Text != "" {
-			data := decoderInfo{
-				log:         pLog,
-				decoderName: decoderNameEntry.Text,
-				prematch:    decoderPrematchEntry.Text,
-				variables:   pVariables,
+			if isValidDecoderName(decoderNameEntry.Text) {
+				data := decoderInfo{
+					log:         pLog,
+					decoderName: decoderNameEntry.Text,
+					prematch:    decoderPrematchEntry.Text,
+					variables:   pVariables,
+				}
+				decoderXMLGenerator(data)
+			} else {
+				dialog.ShowError(errors.New("The decoder name is not valid"), w2)
 			}
-			decoderXMLGenerator(data)
+		} else {
+			dialog.ShowError(errors.New("You must fill all the fields"), w2)
 		}
 	})
 
