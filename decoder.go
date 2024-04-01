@@ -1,6 +1,8 @@
 package main
 
 import (
+	"go_gui/api"
+
 	"errors"
 	"os"
 
@@ -18,9 +20,8 @@ type decoderInfo struct {
 
 var w2 fyne.Window
 
-func CreateDecoderWindow(pLog string, pVariables []string) {
+func CreateDecoderWindow(pLog string, pVariables []string, w1 fyne.Window) {
 	w2 = a.NewWindow("Wizard Menu Decoder")
-
 	decoderNameLabel := widget.NewLabel("Write the name of the new decoder")
 	decoderNameLabel.Wrapping = fyne.TextWrapBreak
 	decoderNameEntry := widget.NewEntry()
@@ -80,10 +81,16 @@ func decoderXMLGenerator(data decoderInfo) {
 		xmlFile.WriteString(xml)
 		dialog.ShowCustomConfirm("Success!", "Generate Rule", "Cancel", widget.NewLabel("Do you want to generate the rule for this decoder?"), func(b bool) {
 			if b {
+				go CreateRuleWindow(data.decoderName, data.variables)
 				w2.Close()
-				CreateRuleWindow(data.decoderName, data.variables)
 			} else {
-				w2.Close()
+				dialog.ShowConfirm("Upload decoder file", "Do you want to upload the decoder to Wazuh Server?", func(b bool) {
+					if b {
+						api.UploadFileAfterCreation(false)
+						dialog.ShowInformation("Success!", "The decoder file was uploaded successfully", w)
+					}
+					w2.Close()
+				}, w2)
 			}
 		}, w2)
 	}

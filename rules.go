@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"strconv"
 
@@ -25,7 +24,8 @@ type ruleInfo struct {
 
 func CreateRuleWindow(pDecoderName string, pVariables []string) {
 	w3 = a.NewWindow("Wizard Menu Rule")
-	fmt.Println("I've created the window")
+	progressBar := dialog.NewCustomWithoutButtons("Loading...", widget.NewProgressBarInfinite(), w3)
+
 	ruleIDLabel := widget.NewLabel("Write the ID of your new rule")
 	ruleIDEntry := widget.NewEntry()
 	ruleIDEntry.SetPlaceHolder("Ej. 202232")
@@ -43,13 +43,16 @@ func CreateRuleWindow(pDecoderName string, pVariables []string) {
 
 	submitButton := widget.NewButton("Submit", func() {
 		if ruleIDEntry.Text != "" && ruleDescriptionEntry.Text != "" && ruleLevelEntry.Text != "" {
+			progressBar.Show()
 			ruleLevel, err := strconv.Atoi(ruleLevelEntry.Text)
 			if err != nil {
+				progressBar.Hide()
 				dialog.ShowError(errors.New("Invalid rule level. Please enter a number."), w3)
 				return
 			}
 
 			if ruleLevel > 16 {
+				progressBar.Hide()
 				dialog.ShowError(errors.New("Rule level cannot be greater than 16."), w3)
 				return
 			}
@@ -57,10 +60,13 @@ func CreateRuleWindow(pDecoderName string, pVariables []string) {
 			var ruleIDs map[string]bool = api.RequestRuleIDs(w3)
 			ruleID, err := strconv.Atoi(ruleIDEntry.Text)
 			if ruleID < 100000 || ruleID > 120000 {
+				progressBar.Hide()
 				dialog.ShowError(errors.New("The rule must be between the range 100000-120000"), w3)
+				return
 			}
 
 			if utils.CompareExistingIDs(ruleIDs, ruleIDEntry.Text) {
+				progressBar.Hide()
 				dialog.ShowError(errors.New("That rule already exists, pick another ID"), w3)
 				return
 			}
@@ -72,11 +78,10 @@ func CreateRuleWindow(pDecoderName string, pVariables []string) {
 				decoderName: pDecoderName,
 				variables:   pVariables,
 			}
-			ruleXMLGenerator(data)
+			go ruleXMLGenerator(data)
+			progressBar.Hide()
 		}
 	})
-
-	fmt.Println("I've created the content")
 
 	form := container.NewVBox(ruleIDBox, ruleLevelBox, ruleDescriptionBox, submitButton)
 	content := container.NewHBox(layout.NewSpacer(), form, layout.NewSpacer())
@@ -84,7 +89,6 @@ func CreateRuleWindow(pDecoderName string, pVariables []string) {
 	w3.Resize(fyne.NewSize(800, 600))
 	w3.SetFixedSize(true)
 	w3.Show()
-	fmt.Println("I've shown the window")
 }
 
 func ruleXMLGenerator(data ruleInfo) {
@@ -92,14 +96,18 @@ func ruleXMLGenerator(data ruleInfo) {
 	if err != nil {
 		dialog.ShowError(errors.New("rule xml not created"), w3)
 	} else {
-		var xml string = "<rule id=\"" + data.id + " level=\"" + data.level + ">\n" +
+		var xml string = "<group name=\"" + data.decoderName + "\">" +
+			"<rule id=\"" + data.id + "\" level=\"" + data.level + "\">\n" +
 			"\t<decoded_as>" + data.decoderName + "</decoded_as>\n" +
 			"\t<description>" + data.description + "</description>\n" +
 			"</rule>\n" +
 			"</group>"
 		xmlFile.WriteString(xml)
-		dialog.ShowConfirm("Successful creation!", "Do you want to upload both files to your Wazuh Server?", func(bool) {
-			// Implementación de función para subir archivos a wazuh usando su API
+		dialog.ShowConfirm("Successful creation!", "Do you want to upload both files to your Wazuh Server?", func(b bool) {
+			if b {
+				api.UploadFileAfterCreation(true)
+				dialog.ShowInformation("Success!", "The decoder file was uploaded successfully", w)
+			}
 			w3.Close()
 		}, w3)
 	}

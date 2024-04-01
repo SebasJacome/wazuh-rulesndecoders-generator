@@ -110,7 +110,7 @@ func processData(data struct {
 	if result == "" {
 		fmt.Println("All the variables were found inside the log...")
 		fmt.Println("End of validation")
-		CreateDecoderWindow(data.log, processedVars)
+		CreateDecoderWindow(data.log, processedVars, w)
 	} else {
 		fmt.Println("There is one or more variables that were not found in the log")
 		fmt.Println("The variables must be contained by the log")
