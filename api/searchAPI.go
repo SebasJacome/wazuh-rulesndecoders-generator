@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 )
 
 type AffectedItem struct {
@@ -36,6 +35,15 @@ type RuleResponse struct {
 	Error   int    `json:"error"`
 }
 
+type MatchingRule struct {
+	ID          int
+	Description string
+	FileName    string
+	Level       int
+	DirName     string
+	Status      string
+}
+
 func PrettyStruct(data interface{}) (string, error) {
 	val, err := json.MarshalIndent(data, "", "    ")
 	if err != nil {
@@ -44,8 +52,9 @@ func PrettyStruct(data interface{}) (string, error) {
 	return string(val), nil
 }
 
-func SearchRequestedID(id int) {
+func SearchRequestedID(id int) MatchingRule {
 	var str RuleResponse
+	var result MatchingRule
 	readConfFile()
 	response := createRequest("GET", "/rules?relative_dirname=etc%2Frules", "application/json", nil)
 	if err := json.Unmarshal([]byte(response), &str); err != nil {
@@ -54,9 +63,17 @@ func SearchRequestedID(id int) {
 
 	for _, value := range str.Data.AffectedItems {
 		if value.ID == id {
-			res, _ := PrettyStruct(value)
-			fmt.Println(res)
+			result.Description = value.Description
+			result.ID = value.ID
+			result.Level = value.Level
+			result.FileName = value.FileName
+			result.Status = value.Status
+			result.DirName = value.RelativeDirName
+			return result
 		}
 	}
-
+	result.ID = -1
+	result.Level = -1
+	result.Description = "null"
+	return result
 }

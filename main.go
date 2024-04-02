@@ -12,5 +12,6 @@ func main() {
 
 	w.SetContent(MakeGui())
 	w.Resize(fyne.NewSize(800, 600))
+	w.CenterOnScreen()
 	w.ShowAndRun()
 }

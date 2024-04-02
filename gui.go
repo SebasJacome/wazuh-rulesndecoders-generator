@@ -4,10 +4,8 @@ package main
 import (
 	"errors"
 	"fmt"
-	"go_gui/api"
 	"go_gui/utils"
 	"image/color"
-	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -18,32 +16,23 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+var red color.NRGBA = color.NRGBA{R: 180, G: 0, B: 0, A: 255}
 var logEntries = widget.NewEntry()
 var variablesEntries = widget.NewEntry()
 
 func MakeGui() fyne.CanvasObject {
-	return container.NewBorder(makeToolBar(), nil, nil, nil, createContent())
+	return container.NewBorder(makeToolBar(), nil, nil, nil, createMainContent())
 }
-
 func makeToolBar() fyne.CanvasObject {
 	toolbar := widget.NewToolbar(
 		widget.NewToolbarAction(theme.ContentAddIcon(), func() {}),
-		widget.NewToolbarAction(theme.SearchIcon(), func() {
-			id := widget.NewEntry()
-			idName := widget.NewFormItem("ID", id)
-			dialog.ShowForm("Title", "Yes", "Cancel", []*widget.FormItem{idName}, func(b bool) {
-				if b {
-					idInt, err := strconv.Atoi(id.Text)
-					if err != nil {
-						panic(err)
-					}
-					api.SearchRequestedID(idInt)
-				}
-			}, w)
-		}),
+		widget.NewToolbarAction(theme.SearchIcon(), SearchWindow),
 		widget.NewToolbarAction(theme.DeleteIcon(), func() {
 			logEntries.SetText("")
 			variablesEntries.SetText("")
+		}),
+		widget.NewToolbarAction(theme.ZoomInIcon(), func() {
+
 		}),
 	)
 	logo := canvas.NewImageFromResource(resourceLogosUPPng)
@@ -51,8 +40,7 @@ func makeToolBar() fyne.CanvasObject {
 	return container.NewStack(toolbar, logo)
 }
 
-func createContent() fyne.CanvasObject {
-	red := color.NRGBA{R: 180, G: 0, B: 0, A: 255}
+func createMainContent() fyne.CanvasObject {
 	errorLabel := canvas.NewText("Cannot Be Empty", red)
 	errorLabel2 := canvas.NewText("Cannot Be Empty", red)
 	errorLabel.Hide()
