@@ -1,3 +1,4 @@
 *.app
 conf.toml
 *.xml
+.DS_Store

@@ -33,7 +33,7 @@ func CreateRuleWindow(pDecoderName string, pVariables []string) {
 
 	ruleLevelLabel := widget.NewLabel("Write the Level of your new rule")
 	ruleLevelEntry := widget.NewEntry()
-	ruleLevelEntry.SetPlaceHolder("Ej. 10 (Rule level can go from 1 to 15)")
+	ruleLevelEntry.SetPlaceHolder("Ej. 10 (Rule level can go from 1 to 16)")
 	ruleLevelBox := container.NewVBox(ruleLevelLabel, ruleLevelEntry)
 
 	ruleDescriptionLabel := widget.NewLabel("Write description of your new rule")
