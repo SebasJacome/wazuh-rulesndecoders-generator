@@ -26,13 +26,15 @@ func MakeGui() fyne.CanvasObject {
 func makeToolBar() fyne.CanvasObject {
 	toolbar := widget.NewToolbar(
 		widget.NewToolbarAction(theme.ContentAddIcon(), func() {}),
+		widget.NewToolbarSeparator(),
 		widget.NewToolbarAction(theme.SearchIcon(), SearchWindow),
+		widget.NewToolbarAction(theme.ZoomInIcon(), SelectIDorDecoderWindow),
+		widget.NewToolbarSeparator(),
+		widget.NewToolbarSpacer(),
+		widget.NewToolbarSeparator(),
 		widget.NewToolbarAction(theme.DeleteIcon(), func() {
 			logEntries.SetText("")
 			variablesEntries.SetText("")
-		}),
-		widget.NewToolbarAction(theme.ZoomInIcon(), func() {
-
 		}),
 	)
 	logo := canvas.NewImageFromResource(resourceLogosUPPng)
@@ -98,7 +100,7 @@ func createMainContent() fyne.CanvasObject {
 		}
 	})
 
-	inputVBox := container.NewVBox(logLabel, logEntries, errorLabel, variablesLabel, variablesEntries, errorLabel2, layout.NewSpacer(), button, layout.NewSpacer())
+	inputVBox := container.NewVBox(layout.NewSpacer(), logLabel, logEntries, errorLabel, variablesLabel, variablesEntries, errorLabel2, layout.NewSpacer(), button, layout.NewSpacer(), layout.NewSpacer())
 	return container.NewHBox(layout.NewSpacer(), inputVBox, layout.NewSpacer())
 
 }

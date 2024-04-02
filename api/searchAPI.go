@@ -77,3 +77,25 @@ func SearchRequestedID(id int) MatchingRule {
 	result.Description = "null"
 	return result
 }
+
+func SearchForAllIDs() []MatchingRule {
+	var str RuleResponse
+	var result MatchingRule
+	var results []MatchingRule
+	readConfFile()
+	response := createRequest("GET", "/rules?relative_dirname=etc%2Frules", "application/json", nil)
+	if err := json.Unmarshal([]byte(response), &str); err != nil {
+		panic(err)
+	}
+
+	for _, value := range str.Data.AffectedItems {
+		result.Description = value.Description
+		result.ID = value.ID
+		result.Level = value.Level
+		result.FileName = value.FileName
+		result.Status = value.Status
+		result.DirName = value.RelativeDirName
+		results = append(results, result)
+	}
+	return results
+}

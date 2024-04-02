@@ -25,6 +25,7 @@ type ruleInfo struct {
 func CreateRuleWindow(pDecoderName string, pVariables []string) {
 	w3 = a.NewWindow("Wizard Menu Rule")
 	progressBar := dialog.NewCustomWithoutButtons("Loading...", widget.NewProgressBarInfinite(), w3)
+	progressBar.Resize(fyne.NewSize(300, 100))
 
 	ruleIDLabel := widget.NewLabel("Write the ID of your new rule")
 	ruleIDEntry := widget.NewEntry()
