@@ -25,7 +25,7 @@ func MakeGui() fyne.CanvasObject {
 }
 func makeToolBar() fyne.CanvasObject {
 	toolbar := widget.NewToolbar(
-		widget.NewToolbarAction(theme.ContentAddIcon(), func() {}),
+		widget.NewToolbarAction(theme.UploadIcon(), UploadWindow),
 		widget.NewToolbarSeparator(),
 		widget.NewToolbarAction(theme.SearchIcon(), SearchWindow),
 		widget.NewToolbarAction(theme.ZoomInIcon(), SelectIDorDecoderWindow),
