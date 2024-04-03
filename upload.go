@@ -22,6 +22,8 @@ func UploadWindow() {
 
 	fileLabel := widget.NewLabel("Select an XML file:")
 	fileEntry := widget.NewEntry()
+	fileEntry.Disable()
+	fileEntry.SetPlaceHolder("No file selected...")
 	fileOpen := widget.NewButtonWithIcon("Open File", theme.FileIcon(), func() {
 		openFileDialog(myWindow, fileEntry)
 	})
@@ -50,14 +52,14 @@ func UploadWindow() {
 
 	})
 
-	content := container.New(layout.NewVBoxLayout(),
-		fileLabel,
-		container.New(layout.NewHBoxLayout(), fileEntry, fileOpen),
-		uploadButton,
-	)
+	header := container.NewHBox(layout.NewSpacer(), fileLabel, layout.NewSpacer())
+	fileContent := container.New(layout.NewFormLayout(), fileOpen, fileEntry)
+	content := container.NewVBox(layout.NewSpacer(), header, fileContent, uploadButton, layout.NewSpacer())
 
 	myWindow.SetContent(content)
-	myWindow.Resize(fyne.NewSize(800, 600))
+	myWindow.Resize(fyne.NewSize(500, 350))
+	myWindow.SetFixedSize(true)
+	myWindow.CenterOnScreen()
 	myWindow.Show()
 }
 
