@@ -2,3 +2,5 @@
 conf.toml
 *.xml
 .DS_Store
+
+.vscode
