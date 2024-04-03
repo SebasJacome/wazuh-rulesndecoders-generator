@@ -2,9 +2,11 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
+	"strconv"
 )
 
-type AffectedItem struct {
+type RuleAffectedItem struct {
 	FileName        string      `json:"filename"`
 	RelativeDirName string      `json:"relative_dirname"`
 	ID              int         `json:"id"`
@@ -22,17 +24,17 @@ type AffectedItem struct {
 	Description     string      `json:"description"`
 }
 
-type Data struct {
-	AffectedItems      []AffectedItem `json:"affected_items"`
-	TotalAffectedItems int            `json:"total_affected_items"`
-	TotalFailedItems   int            `json:"total_failed_items"`
-	FailedItems        []interface{}  `json:"failed_items"`
+type RuleData struct {
+	AffectedItems      []RuleAffectedItem `json:"affected_items"`
+	TotalAffectedItems int                `json:"total_affected_items"`
+	TotalFailedItems   int                `json:"total_failed_items"`
+	FailedItems        []interface{}      `json:"failed_items"`
 }
 
 type RuleResponse struct {
-	Data    Data   `json:"data"`
-	Message string `json:"message"`
-	Error   int    `json:"error"`
+	Data    RuleData `json:"data"`
+	Message string   `json:"message"`
+	Error   int      `json:"error"`
 }
 
 type MatchingRule struct {
@@ -42,6 +44,29 @@ type MatchingRule struct {
 	Level       int
 	DirName     string
 	Status      string
+}
+
+type DecoderAffectedItem struct {
+	FileName        string      `json:"filename"`
+	RelativeDirName string      `json:"relative_dirname"`
+	Status          string      `json:"status"`
+	Name            string      `json:"name"`
+	Position        int         `json:"position"`
+	Level           int         `json:"level"`
+	Details         interface{} `json:"details"`
+}
+
+type DecoderData struct {
+	AffectedItems      []DecoderAffectedItem `json:"affected_items"`
+	TotalAffectedItems int                   `json:"total_affected_items"`
+	TotalFailedItems   int                   `json:"total_failed_items"`
+	FailedItems        []interface{}         `json:"failed_items"`
+}
+
+type DecoderResponse struct {
+	Data    DecoderData `json:"data"`
+	Message string      `json:"message"`
+	Error   int         `json:"error"`
 }
 
 func PrettyStruct(data interface{}) (string, error) {
@@ -76,6 +101,80 @@ func SearchRequestedID(id int) MatchingRule {
 	result.Level = -1
 	result.Description = "null"
 	return result
+}
+
+func SearchRequestedParameters(values []string) (bool, string) {
+	var str RuleResponse
+	var FoundValues []bool
+	var errorMessage string = ""
+	var all_found bool = true
+	readConfFile()
+	response := createRequest("GET", "/rules?relative_dirname=etc%2Frules", "application/json", nil)
+	if err := json.Unmarshal([]byte(response), &str); err != nil {
+		panic(err)
+	}
+	for i := range len(values) {
+		fmt.Println(i)
+		FoundValues = append(FoundValues, false)
+	}
+	for valueIndex, value := range values {
+		for _, existingRule := range str.Data.AffectedItems {
+			strval, err := strconv.Atoi(value)
+			if err != nil {
+				panic(err)
+			}
+			if existingRule.ID == strval {
+				FoundValues[valueIndex] = true
+			}
+		}
+	}
+	for index, value := range FoundValues {
+		if !value {
+			errorMessage += values[index] + ","
+			all_found = false
+		}
+	}
+	if all_found {
+		return true, ""
+	} else {
+		errorMessage = "Referenced Rule IDs " + errorMessage[:len(errorMessage)-1] + " did not match any existing rule ID"
+		return false, errorMessage
+	}
+}
+
+func SearchRequestedDecoder(values []string) (bool, string) {
+	var str DecoderResponse
+	var FoundValues []bool
+	var errorMessage string = ""
+	var all_found bool = true
+	readConfFile()
+	response := createRequest("GET", "/decoders?relative_dirname=etc%2Fdecoders", "application/json", nil)
+	if err := json.Unmarshal([]byte(response), &str); err != nil {
+		panic(err)
+	}
+	for i := range len(values) {
+		fmt.Println(i)
+		FoundValues = append(FoundValues, false)
+	}
+	for valueIndex, value := range values {
+		for _, existingDecoder := range str.Data.AffectedItems {
+			if existingDecoder.Name == value {
+				FoundValues[valueIndex] = true
+			}
+		}
+	}
+	for index, value := range FoundValues {
+		if !value {
+			errorMessage += values[index] + ","
+			all_found = false
+		}
+	}
+	if all_found {
+		return true, ""
+	} else {
+		errorMessage = "Decoder_as " + errorMessage[:len(errorMessage)-1] + " did not match any existing decoder name"
+		return false, errorMessage
+	}
 }
 
 func SearchForAllIDs() []MatchingRule {

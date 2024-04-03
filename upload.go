@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"go_gui/api"
 	"io"
 	"os"
 	"regexp"
@@ -78,12 +79,12 @@ func parseXMLFile(fileBytes []byte) (string, error) {
 	}
 
 	// Check for root element
-	rootElementRegex := regexp.MustCompile(`^<(decoder|group)\s+name="[\w\-]+">`)
+	rootElementRegex := regexp.MustCompile(`^<(decoder|group)\s+name="([\w\-]+,)+">`)
 	matches := rootElementRegex.FindStringSubmatch(fileContent)
+	fmt.Println(fileContent)
 	if len(matches) < 2 {
 		return "", errors.New("invalid XML file, unable to determine root element (rule or decoder)")
 	}
-
 	allowedDecoderTags := []string{
 		"name", "parent", "accumulate", "program_name", "prematch", "regex", "order",
 		"fts", "ftscomment", "plugin_decoder", "use_own_name", "json_null_field",
@@ -117,18 +118,65 @@ func parseXMLFile(fileBytes []byte) (string, error) {
 				return "", fmt.Errorf("disallowed tag '%s' found in the decoder", tag)
 			}
 		}
-		return "decoder", nil
+		return " ", fmt.Errorf("disallowed checking in the rules")
+		//return "decoder", nil
 	case "group":
 		// Check for disallowed tags in rules
 		tagRegex := regexp.MustCompile(`<(\w+)`)
 		tags := tagRegex.FindAllString(fileContent, -1)
 		for _, tag := range tags {
+			//fmt.Println(tag)
 			tag = strings.TrimPrefix(tag, "<")
 			if !stringInSlice(tag, allowedRuleTags) {
 				return "", fmt.Errorf("disallowed tag '%s' found in the rules", tag)
 			}
 		}
-		return "rules", nil
+		inheritedDecoderRegex := regexp.MustCompile(`<decoded_as>\s*([\w\-]+)</decoded_as>`)
+		inheritedRuleListRegex := regexp.MustCompile(`<if_sid>\s*([\w\-]+|([\w\-]+),+[\w\-]+)</if_sid>`)
+		inheritedRuleRegex := regexp.MustCompile(`<if_matched_sid>\s*([\w\-]+)</if_matched_sid>`)
+		inheritedDecoder := inheritedDecoderRegex.FindStringSubmatch(fileContent)
+		inheritedRuleList := inheritedRuleListRegex.FindStringSubmatch(fileContent)
+		inheritedRule := inheritedRuleRegex.FindStringSubmatch(fileContent)
+		var was_found bool = true
+		var errorMessage string = ""
+		var tempErrorMessage string = ""
+		if len(inheritedDecoder) >= 2 {
+			inheritedDecoder = inheritedDecoder[1:]
+			//fmt.Println(inheritedDecoder)
+			was_found, errorMessage = api.SearchRequestedDecoder(inheritedDecoder)
+		}
+		if len(inheritedRuleList) >= 2 {
+			if len(inheritedRuleList) > 2 {
+				inheritedRuleList = inheritedRuleList[1 : len(inheritedRuleList)-1]
+				inheritedRuleList = strings.Split(inheritedRuleList[0], ",")
+			} else {
+				inheritedRuleList = inheritedRuleList[1:]
+			}
+			if len(inheritedRule) >= 2 {
+				inheritedRuleList = append(inheritedRuleList, inheritedRule[1])
+			}
+			//fmt.Println(inheritedRuleList)
+			was_found, tempErrorMessage = api.SearchRequestedParameters(inheritedRuleList)
+			if errorMessage != "" {
+				errorMessage += "\n" + tempErrorMessage
+			} else {
+				errorMessage = tempErrorMessage
+			}
+		}
+		if len(inheritedRuleList) < 2 && len(inheritedRule) >= 2 {
+			inheritedRule = inheritedRule[1:]
+			//fmt.Println(inheritedRule)
+			was_found, tempErrorMessage = api.SearchRequestedParameters(inheritedRule)
+			if errorMessage != "" {
+				errorMessage += "\n" + tempErrorMessage
+			} else {
+				errorMessage = tempErrorMessage
+			}
+		}
+		if was_found {
+			return "rules", nil
+		}
+		return " ", fmt.Errorf(errorMessage)
 	default:
 		return "", errors.New("unknown XML file type")
 	}
@@ -150,11 +198,12 @@ func getFilename(path string) string {
 
 func openFileDialog(window fyne.Window, fileEntry *widget.Entry) {
 	fd := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
-		if reader == nil {
-			return
-		}
 		if err == nil {
-			fileEntry.SetText(reader.URI().Path())
+			if reader == nil {
+				return
+			} else {
+				fileEntry.SetText(reader.URI().Path())
+			}
 		}
 	}, window)
 	fd.Show()
