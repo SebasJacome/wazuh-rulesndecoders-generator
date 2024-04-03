@@ -148,6 +148,9 @@ func getFilename(path string) string {
 
 func openFileDialog(window fyne.Window, fileEntry *widget.Entry) {
 	fd := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+		if reader == nil {
+			return
+		}
 		if err == nil {
 			fileEntry.SetText(reader.URI().Path())
 		}
