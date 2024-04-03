@@ -14,6 +14,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -206,5 +207,6 @@ func openFileDialog(window fyne.Window, fileEntry *widget.Entry) {
 			}
 		}
 	}, window)
+	fd.SetFilter(storage.NewExtensionFileFilter([]string{".xml"}))
 	fd.Show()
 }
