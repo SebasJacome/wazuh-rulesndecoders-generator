@@ -46,14 +46,41 @@ type MatchingRule struct {
 	Status      string
 }
 
+type MatchingDecoder struct {
+	Name            string
+	FileName        string
+	RelativeDirName string
+	Status          string
+	Parent          string
+	Regex           string
+	Prematch        string
+}
+
+type DecoderDetails struct {
+	Parent   string       `json:"parent"`
+	Prematch PrematchInfo `json:"prematch"`
+	Regex    RegexInfo    `json:"regex"`
+	Order    string       `json:"order"`
+}
+
+type PrematchInfo struct {
+	Pattern string `json:"pattern"`
+	Offset  string `json:"offset"`
+}
+
+type RegexInfo struct {
+	Pattern string `json:"pattern"`
+	Offset  string `json:"offset"`
+}
+
 type DecoderAffectedItem struct {
-	FileName        string      `json:"filename"`
-	RelativeDirName string      `json:"relative_dirname"`
-	Status          string      `json:"status"`
-	Name            string      `json:"name"`
-	Position        int         `json:"position"`
-	Level           int         `json:"level"`
-	Details         interface{} `json:"details"`
+	FileName        string         `json:"filename"`
+	RelativeDirName string         `json:"relative_dirname"`
+	Status          string         `json:"status"`
+	Name            string         `json:"name"`
+	Position        int            `json:"position"`
+	Level           int            `json:"level"`
+	Details         DecoderDetails `json:"details"`
 }
 
 type DecoderData struct {
@@ -100,6 +127,33 @@ func SearchRequestedID(id int) MatchingRule {
 	result.ID = -1
 	result.Level = -1
 	result.Description = "null"
+	return result
+}
+
+func SearchRequestedName(name string) MatchingDecoder {
+	var str DecoderResponse
+	var result MatchingDecoder
+	readConfFile()
+	response := createRequest("GET", "/decoders?relative_dirname=etc%2Fdecoders", "application/json", nil)
+	if err := json.Unmarshal([]byte(response), &str); err != nil {
+		panic(err)
+	}
+
+	for _, value := range str.Data.AffectedItems {
+		if value.Name == name {
+			result.Name = value.Name
+			result.FileName = value.FileName
+			result.Status = value.Status
+			result.RelativeDirName = value.RelativeDirName
+			result.Parent = value.Details.Parent
+			result.Prematch = value.Details.Prematch.Pattern
+			result.Regex = value.Details.Regex.Pattern
+			return result
+		}
+	}
+	result.Name = ""
+	result.FileName = ""
+	result.Regex = ""
 	return result
 }
 
@@ -196,5 +250,31 @@ func SearchForAllIDs() []MatchingRule {
 		result.DirName = value.RelativeDirName
 		results = append(results, result)
 	}
+	return results
+}
+
+func SearchForAllDecoders() []MatchingDecoder {
+	var str DecoderResponse
+	var result MatchingDecoder
+	var results []MatchingDecoder
+	readConfFile()
+	response := createRequest("GET", "/decoders?relative_dirname=etc%2Fdecoders", "application/json", nil)
+	if err := json.Unmarshal([]byte(response), &str); err != nil {
+		panic(err)
+	}
+
+	fmt.Println(str)
+
+	for _, value := range str.Data.AffectedItems {
+		result.Name = value.Name
+		result.FileName = value.FileName
+		result.Status = value.Status
+		result.RelativeDirName = value.RelativeDirName
+		result.Parent = value.Details.Parent
+		result.Prematch = value.Details.Prematch.Pattern
+		result.Regex = value.Details.Regex.Pattern
+		results = append(results, result)
+	}
+
 	return results
 }

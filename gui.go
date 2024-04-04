@@ -27,8 +27,8 @@ func makeToolBar() fyne.CanvasObject {
 	toolbar := widget.NewToolbar(
 		widget.NewToolbarAction(theme.UploadIcon(), UploadWindow),
 		widget.NewToolbarSeparator(),
-		widget.NewToolbarAction(theme.SearchIcon(), SearchWindow),
-		widget.NewToolbarAction(theme.ZoomInIcon(), SelectIDorDecoderWindow),
+		widget.NewToolbarAction(theme.SearchIcon(), SelectIDorDecoderSpecificWindow),
+		widget.NewToolbarAction(theme.ZoomInIcon(), SelectIDorDecoderListWindow),
 		widget.NewToolbarSeparator(),
 		widget.NewToolbarSpacer(),
 		widget.NewToolbarSeparator(),
