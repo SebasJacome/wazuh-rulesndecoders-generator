@@ -88,7 +88,7 @@ func CreateRuleWindow(pDecoderName string, pVariables []string) {
 	content := container.NewHBox(layout.NewSpacer(), form, layout.NewSpacer())
 	w3.SetContent(content)
 	w3.Resize(fyne.NewSize(800, 600))
-	w3.SetFixedSize(true)
+	//w3.SetFixedSize(true)
 	w3.Show()
 }
 

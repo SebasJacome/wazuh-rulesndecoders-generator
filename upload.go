@@ -60,7 +60,7 @@ func UploadWindow() {
 
 	myWindow.SetContent(content)
 	myWindow.Resize(fyne.NewSize(500, 350))
-	myWindow.SetFixedSize(true)
+	//myWindow.SetFixedSize(true)
 	myWindow.CenterOnScreen()
 	myWindow.Show()
 }

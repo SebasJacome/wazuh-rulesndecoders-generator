@@ -293,9 +293,9 @@ func createDecoderSearchContent(decoder api.MatchingDecoder) {
 		w.RequestFocus()
 	})
 
-	SearchButton := widget.NewButtonWithIcon("Search another rule", theme.SearchIcon(), func() {
+	SearchButton := widget.NewButtonWithIcon("Search another decoder", theme.SearchIcon(), func() {
 		w7.Close()
-		SearchRuleWindow()
+		SearchDecoderWindow()
 	})
 
 	contentContainer := container.NewVBox(NameLabel, ParentNameLabel, RegexNameLabel, PrematchNameLabel, FileNameLabel, DirNameLabel, StatusLabel)
