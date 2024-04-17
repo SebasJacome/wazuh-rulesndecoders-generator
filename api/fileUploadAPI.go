@@ -21,7 +21,6 @@ type drGeneralResponse struct {
 }
 
 func UploadFileAfterCreation(b bool) {
-	readConfFile()
 	var response drGeneralResponse
 	var decoderXMLFilePath string = "./decoder.xml"
 

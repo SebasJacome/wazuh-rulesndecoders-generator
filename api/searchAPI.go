@@ -107,7 +107,6 @@ func PrettyStruct(data interface{}) (string, error) {
 func SearchRequestedID(id int) MatchingRule {
 	var str RuleResponse
 	var result MatchingRule
-	readConfFile()
 	response := createRequest("GET", "/rules?relative_dirname=etc%2Frules", "application/json", nil)
 	if err := json.Unmarshal([]byte(response), &str); err != nil {
 		panic(err)
@@ -133,7 +132,6 @@ func SearchRequestedID(id int) MatchingRule {
 func SearchRequestedName(name string) MatchingDecoder {
 	var str DecoderResponse
 	var result MatchingDecoder
-	readConfFile()
 	response := createRequest("GET", "/decoders?relative_dirname=etc%2Fdecoders", "application/json", nil)
 	if err := json.Unmarshal([]byte(response), &str); err != nil {
 		panic(err)
@@ -162,7 +160,6 @@ func SearchRequestedParameters(values []string) (bool, string) {
 	var FoundValues []bool
 	var errorMessage string = ""
 	var all_found bool = true
-	readConfFile()
 	response := createRequest("GET", "/rules?relative_dirname=etc%2Frules", "application/json", nil)
 	if err := json.Unmarshal([]byte(response), &str); err != nil {
 		panic(err)
@@ -201,7 +198,6 @@ func SearchRequestedDecoder(values []string) (bool, string) {
 	var FoundValues []bool
 	var errorMessage string = ""
 	var all_found bool = true
-	readConfFile()
 	response := createRequest("GET", "/decoders?relative_dirname=etc%2Fdecoders", "application/json", nil)
 	if err := json.Unmarshal([]byte(response), &str); err != nil {
 		panic(err)
@@ -235,7 +231,6 @@ func SearchForAllIDs() []MatchingRule {
 	var str RuleResponse
 	var result MatchingRule
 	var results []MatchingRule
-	readConfFile()
 	response := createRequest("GET", "/rules?relative_dirname=etc%2Frules", "application/json", nil)
 	if err := json.Unmarshal([]byte(response), &str); err != nil {
 		panic(err)
@@ -257,7 +252,6 @@ func SearchForAllDecoders() []MatchingDecoder {
 	var str DecoderResponse
 	var result MatchingDecoder
 	var results []MatchingDecoder
-	readConfFile()
 	response := createRequest("GET", "/decoders?relative_dirname=etc%2Fdecoders", "application/json", nil)
 	if err := json.Unmarshal([]byte(response), &str); err != nil {
 		panic(err)

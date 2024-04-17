@@ -4,3 +4,5 @@ conf.toml
 .DS_Store
 
 .vscode
+
+bundledResources.go

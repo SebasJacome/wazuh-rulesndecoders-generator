@@ -26,7 +26,6 @@ type JSONRuleFileResponse struct {
 }
 
 func RequestRuleIDs(w3 fyne.Window) map[string]bool {
-	readConfFile()
 	var response JSONRuleFileResponse
 	ruleIDs := make(map[string]bool)
 	stringResponse := createRequest("GET", "/rules/files", "application/json", nil)

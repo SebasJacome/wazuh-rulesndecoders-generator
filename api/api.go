@@ -8,9 +8,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 
-	"github.com/pelletier/go-toml/v2"
+	"github.com/BurntSushi/toml"
 )
 
 var config = struct {
@@ -27,13 +26,9 @@ var config = struct {
 	Password: "",
 }
 
-func readConfFile() {
-	data, err := os.ReadFile("./api/conf.toml")
-	if err != nil {
-		panic(err)
-	}
-	if err := toml.Unmarshal([]byte(data), &config); err != nil {
-		panic(err)
+func ReadConfFile(conf []byte) {
+	if _, err := toml.Decode(string(conf), &config); err != nil {
+		fmt.Println("Error parsing TOML config: ", err)
 	}
 }
 
